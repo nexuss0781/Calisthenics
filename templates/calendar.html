@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Calendar - Calisthenics{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/calendar.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h1>Calendar</h1>
+    <div class="header-actions">
+        <button id="addEventBtn"><i class="fas fa-plus"></i> Add Event</button>
+    </div>
+</div>
+
+<div class="calendar-layout">
+    <div class="calendar-card">
+        <div class="calendar-header">
+            <h2 class="calendar-title">Workout Calendar</h2>
+            <div class="calendar-nav">
+                <button class="nav-btn" id="prevMonth"><i class="fas fa-chevron-left"></i></button>
+                <button class="nav-btn" id="nextMonth"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+        <div class="current-month" id="currentMonth">November 2025</div>
+        <div class="weekdays">
+            <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+        </div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+
+    <div class="plan-card">
+        <h2 class="plan-title">Plan Overview</h2>
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-label">Total Workouts</div><div class="stat-value workouts">{{ total_workouts }}</div></div>
+            <div class="stat-card"><div class="stat-label">Completed</div><div class="stat-value completed">{{ completed_count }}</div></div>
+            <div class="stat-card"><div class="stat-label">Planned</div><div class="stat-value planned">{{ planned_count }}</div></div>
+            <div class="stat-card"><div class="stat-label">Rest Days</div><div class="stat-value rest">{{ rest_count }}</div></div>
+        </div>
+        <div class="progress-section">
+            <h3 class="progress-title">Monthly Progress</h3>
+            <div class="progress-bar"><div class="progress-fill" style="width: {{ progress_percent }}%;"></div></div>
+            <div class="progress-info"><span>{{ progress_percent }}% Completed</span><span>{{ completed_count }}/{{ total_workouts }} workouts</span></div>
+        </div>
+        <div class="plan-list">
+            <h3>Upcoming Plans</h3>
+            {% for event in events %}
+            <div class="plan-item">
+                <div class="plan-icon {{ event.event_type }}">{% if event.event_type == 'workout' %}<i class="fas fa-dumbbell"></i>{% elif event.event_type == 'rest' %}<i class="fas fa-bed"></i>{% elif event.event_type == 'tournament' %}<i class="fas fa-trophy"></i>{% else %}<i class="fas fa-fire"></i>{% endif %}</div>
+                <div class="plan-info"><div class="plan-name">{{ event.name }}</div><div class="plan-date">{{ event.date.strftime('%a, %b %d') }}</div></div>
+                <div class="plan-actions">
+                    <button class="plan-action-btn"><i class="fas fa-edit"></i></button>
+                    <form method="POST" action="{{ url_for('calendar.delete_event', id=event.id) }}" style="display:inline;"><button type="submit" class="plan-action-btn delete" onclick="return confirm('Delete this event?')"><i class="fas fa-trash"></i></button></form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="add-event-modal" id="addEventModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center;">
+    <div class="plan-card" style="max-width: 500px; width: 90%; margin: 0;">
+        <h2 class="plan-title">Add New Event</h2>
+        <form method="POST" action="{{ url_for('calendar.add_event') }}">
+            <div style="margin-bottom: 20px;">
+                <label for="eventType" style="display: block; margin-bottom: 8px; color: var(--text-primary);">Event Type</label>
+                <select id="eventType" name="type" style="width: 100%; padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); border-radius: 5px; color: var(--text-primary); margin-bottom: 15px;">
+                    <option value="workout">Workout Session</option>
+                    <option value="rest">Rest Day</option>
+                    <option value="planned">Planned Activity</option>
+                </select>
+
+                <label for="eventName" style="display: block; margin-bottom: 8px; color: var(--text-primary);">Event Name</label>
+                <input type="text" id="eventName" name="name" placeholder="Enter event name" required style="width: 100%; padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); border-radius: 5px; color: var(--text-primary); margin-bottom: 15px;">
+
+                <label for="eventDate" style="display: block; margin-bottom: 8px; color: var(--text-primary);">Date</label>
+                <input type="date" id="eventDate" name="date" required style="width: 100%; padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); border-radius: 5px; color: var(--text-primary);">
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" class="action-btn" id="cancelEventBtn" style="color: var(--text-secondary); border: 1px solid var(--border-color); padding: 10px 20px; border-radius: 5px; background: transparent;"><i class="fas fa-times"></i> Cancel</button>
+                <button type="submit" class="action-btn" style="background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 5px;"><i class="fas fa-save"></i> Save Event</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/calendar.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var currentDate = new Date(2025, 10, 1);
+    var monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    var workoutDays = [3,5,7,10,12,14,17,19,21,24,26,28];
+    var restDays = [2,9,16,23,30];
+    function generateCalendar() {
+        var grid = document.getElementById('calendarGrid');
+        grid.innerHTML = '';
+        document.getElementById('currentMonth').textContent = monthNames[currentDate.getMonth()] + ' ' + currentDate.getFullYear();
+        var firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
+        var daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+        var daysInPrevMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0).getDate();
+        for (var i = firstDay - 1; i >= 0; i--) {
+            var day = document.createElement('div'); day.className = 'calendar-day other-month';
+            day.innerHTML = '<span class="day-number">' + (daysInPrevMonth - i) + '</span>'; grid.appendChild(day);
+        }
+        var today = new Date();
+        for (var d = 1; d <= daysInMonth; d++) {
+            var day = document.createElement('div'); day.className = 'calendar-day';
+            if (d === today.getDate() && currentDate.getMonth() === today.getMonth() && currentDate.getFullYear() === today.getFullYear()) day.classList.add('today');
+            var eventsHtml = '';
+            if (workoutDays.indexOf(d) !== -1) eventsHtml += '<div class="event-indicator workout"></div>';
+            if (restDays.indexOf(d) !== -1) eventsHtml += '<div class="event-indicator rest"></div>';
+            day.innerHTML = '<span class="day-number">' + d + '</span><div class="day-events">' + eventsHtml + '</div>';
+            grid.appendChild(day);
+        }
+        var totalCells = firstDay + daysInMonth;
+        for (var j = 1; j <= 42 - totalCells; j++) {
+            var day = document.createElement('div'); day.className = 'calendar-day other-month';
+            day.innerHTML = '<span class="day-number">' + j + '</span>'; grid.appendChild(day);
+        }
+    }
+    generateCalendar();
+    document.getElementById('prevMonth').addEventListener('click', function() { currentDate.setMonth(currentDate.getMonth() - 1); generateCalendar(); });
+    document.getElementById('nextMonth').addEventListener('click', function() { currentDate.setMonth(currentDate.getMonth() + 1); generateCalendar(); });
+
+    var addEventBtn = document.getElementById('addEventBtn');
+    var addEventModal = document.getElementById('addEventModal');
+    var cancelEventBtn = document.getElementById('cancelEventBtn');
+    addEventBtn.addEventListener('click', function() { addEventModal.style.display = 'flex'; });
+    cancelEventBtn.addEventListener('click', function() { addEventModal.style.display = 'none'; });
+    addEventModal.addEventListener('click', function(e) { if (e.target === addEventModal) addEventModal.style.display = 'none'; });
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('/calendar/api/events')
+        .then(function(r) { return r.json(); })
+        .then(function(events) {
+            window.workoutPlans = {};
+            events.forEach(function(e) {
+                window.workoutPlans[e.date] = { type: e.type, name: e.name };
+            });
+        })
+        .catch(function() {});
+});
+</script>
+{% endblock %}

@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Workouts - Calisthenics{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/workouts.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h1>Workouts</h1>
+    <div class="header-actions">
+        <button id="addExerciseBtn"><i class="fas fa-plus"></i> Add Exercise</button>
+    </div>
+</div>
+
+<div class="workouts-grid">
+    {% if exercises %}
+    {% for exercise in exercises %}
+    <div class="exercise-card" data-exercise="{{ exercise.name|lower|replace(' ', '') }}">
+        <div class="card-header">
+            <div class="exercise-name">{{ exercise.name }}</div>
+            <div class="exercise-difficulty difficulty-{{ exercise.difficulty }}">{{ exercise.difficulty|capitalize }}</div>
+        </div>
+        <div class="exercise-stats">
+            <div class="stat-item"><div class="stat-value">{{ exercise.sets }}</div><div class="stat-label">Sets</div></div>
+            <div class="stat-item"><div class="stat-value">{{ exercise.reps }}</div><div class="stat-label">Reps</div></div>
+            <div class="stat-item"><div class="stat-value">{{ exercise.rest_minutes }}m</div><div class="stat-label">Rest</div></div>
+        </div>
+        <div class="expanded-content">
+            <div class="workout-plan">
+                <h4>Weekly Workout Plan</h4>
+                <div class="workout-days">
+                    {% for day in exercise.days %}
+                    <div class="day-card">
+                        <div class="day-name">{{ day.day }}</div>
+                        {% if day.status == 'done' %}
+                        <div class="day-status completed">&#10003; Done</div>
+                        {% elif day.status == 'today' %}
+                        <div class="day-status pending">&#9654; Today</div>
+                        {% elif day.status == 'missed' %}
+                        <div class="day-status missed">&#10007; Missed</div>
+                        {% else %}
+                        <div class="day-status">Scheduled</div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="exercise-details">
+                <h4>Proper Form Instructions</h4>
+                <ul class="exercise-steps">
+                    {% for instruction in exercise.form_list %}
+                    <li>{{ instruction }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="card-actions">
+                <button class="action-btn edit"><i class="fas fa-edit"></i> Edit</button>
+                <form method="POST" action="{{ url_for('workouts.delete_exercise', id=exercise.id) }}" style="display:inline;">
+                    <button class="action-btn delete" type="submit"><i class="fas fa-trash"></i> Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="exercise-card">
+        <div class="card-header">
+            <div class="exercise-name">No exercises yet</div>
+        </div>
+        <div class="exercise-stats">
+            <p style="color: var(--text-secondary); padding: 20px;">Add your first exercise to get started!</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<div class="add-exercise-form" id="addExerciseForm" style="display: none; margin-top: 30px;">
+    <div class="exercise-card">
+        <form method="POST" action="{{ url_for('workouts.add_exercise') }}">
+        <h3 style="margin-bottom: 20px; color: var(--text-primary);">Add New Exercise</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+            <div><label for="exerciseName" style="display: block; margin-bottom: 5px; color: var(--text-primary);">Exercise Name</label><input type="text" id="exerciseName" name="name" placeholder="Enter exercise name" style="width: 100%; padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); border-radius: 5px; color: var(--text-primary);"></div>
+            <div><label for="sets" style="display: block; margin-bottom: 5px; color: var(--text-primary);">Sets</label><input type="number" id="sets" name="sets" min="1" max="10" value="3" style="width: 100%; padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); border-radius: 5px; color: var(--text-primary);"></div>
+            <div><label for="reps" style="display: block; margin-bottom: 5px; color: var(--text-primary);">Reps</label><input type="number" id="reps" name="reps" min="1" max="100" value="15" style="width: 100%; padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); border-radius: 5px; color: var(--text-primary);"></div>
+            <div><label for="difficulty" style="display: block; margin-bottom: 5px; color: var(--text-primary);">Difficulty Level</label><select id="difficulty" name="difficulty" style="width: 100%; padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); border-radius: 5px; color: var(--text-primary);"><option value="">Select difficulty</option><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select></div>
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <button type="button" class="action-btn" id="cancelExerciseBtn" style="color: var(--text-secondary); border: 1px solid var(--border-color);"><i class="fas fa-times"></i> Cancel</button>
+            <button type="submit" class="action-btn" style="background: var(--primary); color: white; border: none;"><i class="fas fa-save"></i> Save Exercise</button>
+        </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/workouts.js') }}"></script>
+<script>
+document.querySelectorAll('.exercise-card').forEach(function(card) {
+    card.addEventListener('click', function(e) {
+        if (e.target.closest('.action-btn') || e.target.closest('form')) return;
+        var isExpanded = this.classList.contains('expanded');
+        document.querySelectorAll('.exercise-card').forEach(function(c) { c.classList.remove('expanded'); });
+        if (!isExpanded) this.classList.add('expanded');
+    });
+});
+document.querySelectorAll('.action-btn.edit').forEach(function(btn) {
+    btn.addEventListener('click', function(e) { e.stopPropagation(); alert('Edit functionality would open a form to modify this exercise.'); });
+});
+document.getElementById('addExerciseBtn').addEventListener('click', function() {
+    var form = document.getElementById('addExerciseForm');
+    if (form.style.display === 'none' || form.style.display === '') {
+        form.style.display = 'block'; this.innerHTML = '<i class="fas fa-times"></i> Cancel'; this.style.backgroundColor = '#d63031'; this.style.borderColor = '#d63031';
+    } else {
+        form.style.display = 'none'; this.innerHTML = '<i class="fas fa-plus"></i> Add Exercise'; this.style.backgroundColor = '#ff6b35'; this.style.borderColor = '#ff6b35';
+    }
+});
+document.getElementById('cancelExerciseBtn').addEventListener('click', function() {
+    document.getElementById('addExerciseForm').style.display = 'none';
+    document.getElementById('addExerciseBtn').innerHTML = '<i class="fas fa-plus"></i> Add Exercise';
+    document.getElementById('addExerciseBtn').style.backgroundColor = '#ff6b35'; document.getElementById('addExerciseBtn').style.borderColor = '#ff6b35';
+});
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.exercise-card')) { document.querySelectorAll('.exercise-card').forEach(function(card) { card.classList.remove('expanded'); }); }
+});
+</script>
+{% endblock %}

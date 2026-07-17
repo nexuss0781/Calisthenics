@@ -1,0 +1,268 @@
+.health-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.health-card {
+    background: var(--card-bg);
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    border: 1px solid var(--border-color);
+}
+
+.card-title {
+    font-size: 1.5rem;
+    color: var(--text-primary);
+}
+
+.basic-info-form {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    color: var(--text-primary);
+}
+
+.form-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.form-btn {
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    border: none;
+}
+
+.form-btn.cancel {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+}
+
+.form-btn.save {
+    background: var(--primary);
+    color: white;
+}
+
+.form-btn.cancel:hover { background: rgba(255,255,255,0.1); }
+.form-btn.save:hover { background: #e55a2b; }
+
+.health-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.stat-card {
+    background: rgba(255,255,255,0.05);
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.stat-value.weight { color: var(--primary); }
+.stat-value.height { color: var(--accent); }
+.stat-value.bmi { color: var(--success); }
+
+.charts-section {
+    margin-top: 25px;
+}
+
+.chart-container {
+    height: 250px;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.chart-title {
+    text-align: center;
+    margin-bottom: 15px;
+    color: var(--text-primary);
+}
+
+.chart-bar {
+    position: absolute;
+    bottom: 0;
+    width: 40px;
+    background: linear-gradient(to top, var(--primary), var(--accent));
+    border-radius: 5px 5px 0 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.chart-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.calendar-section {
+    margin-top: 25px;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    background: rgba(255,255,255,0.05);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.calendar-day {
+    text-align: center;
+    padding: 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.calendar-day:hover { background: rgba(255,255,255,0.1); }
+
+.calendar-day.measured {
+    background: rgba(0, 184, 148, 0.3);
+    color: var(--success);
+    font-weight: bold;
+}
+
+.calendar-day.today {
+    background: rgba(255, 107, 53, 0.3);
+    color: var(--primary);
+    border: 2px solid var(--primary);
+}
+
+.health-plan {
+    margin-top: 25px;
+}
+
+.plan-items {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.plan-item {
+    background: rgba(255,255,255,0.05);
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 3px solid var(--success);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid var(--border-color);
+}
+
+.plan-item.completed {
+    border-left-color: var(--primary);
+    opacity: 0.7;
+}
+
+.plan-item-content h4 { margin-bottom: 5px; }
+.plan-item-content p { color: var(--text-secondary); font-size: 0.9rem; }
+
+.plan-item-actions { display: flex; gap: 10px; }
+
+.plan-action-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.plan-action-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-primary); }
+.plan-action-btn.complete { color: var(--success); }
+.plan-action-btn.complete:hover { background: rgba(0, 184, 148, 0.2); color: white; }
+.plan-action-btn.delete { color: var(--danger); }
+.plan-action-btn.delete:hover { background: rgba(214, 48, 49, 0.2); color: white; }
+
+.export-section {
+    margin-top: 25px;
+    text-align: center;
+}
+
+.export-btn {
+    background: var(--accent);
+    color: var(--dark);
+    border: none;
+    padding: 12px 25px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.export-btn:hover {
+    background: var(--text-primary);
+    transform: translateY(-2px);
+}
+
+@media (max-width: 1200px) {
+    .health-layout { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+    .basic-info-form { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 900px) {
+    .health-stats { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 600px) {
+    .health-stats { grid-template-columns: 1fr; }
+}

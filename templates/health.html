@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Health - Calisthenics{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/health.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h1>Health Metrics</h1>
+    <div class="header-actions">
+        <button id="addMeasurementBtn"><i class="fas fa-plus"></i> Add Measurement</button>
+    </div>
+</div>
+
+<div class="health-layout">
+    <div class="health-card">
+        <form method="POST" action="{{ url_for('health.add_record') }}">
+        <div class="card-header"><h2 class="card-title">Basic Information</h2></div>
+        <div class="basic-info-form">
+            <div class="form-group"><label for="weight">Weight (kg)</label><input type="number" id="weight" name="weight" value="{{ latest.weight if latest else '' }}" step="0.1"></div>
+            <div class="form-group"><label for="height">Height (cm)</label><input type="number" id="height" name="height" value="{{ latest.height if latest else '' }}" step="0.1"></div>
+            <div class="form-group"><label for="age">Age</label><input type="number" id="age" name="age" value="{{ latest.age if latest else '' }}"></div>
+            <div class="form-group"><label for="gender">Gender</label><select id="gender" name="gender"><option value="male" {{ 'selected' if latest and latest.gender == 'male' else '' }}>Male</option><option value="female" {{ 'selected' if latest and latest.gender == 'female' else '' }}>Female</option></select></div>
+            <div class="form-group"><label for="bodyFat">Body Fat %</label><input type="number" id="bodyFat" name="body_fat" value="{{ latest.body_fat if latest else '' }}" step="0.1"></div>
+            <div class="form-group"><label for="performanceNotes">Performance Notes</label><input type="text" id="performanceNotes" placeholder="Any notes about your performance"></div>
+        </div>
+        <div class="form-buttons">
+            <button type="button" class="form-btn cancel">Cancel</button>
+            <button type="submit" class="form-btn save">Save Profile</button>
+        </div>
+        </form>
+    </div>
+
+    <div class="health-card">
+        <div class="card-header"><h2 class="card-title">Health Stats</h2></div>
+        <div class="health-stats">
+            <div class="stat-card"><div class="stat-label">Weight</div><div class="stat-value weight">{{ latest.weight if latest else 'N/A' }}{{ 'kg' if latest and latest.weight else '' }}</div><div class="stat-label">{{ 'Last updated: Today' if latest else 'No data' }}</div></div>
+            <div class="stat-card"><div class="stat-label">Height</div><div class="stat-value height">{{ latest.height if latest else 'N/A' }}{{ 'cm' if latest and latest.height else '' }}</div><div class="stat-label">{{ 'Measured: ' ~ latest.date.strftime('%b %d') if latest and latest.date else 'No data' }}</div></div>
+            <div class="stat-card"><div class="stat-label">BMI</div><div class="stat-value bmi">{{ latest.bmi if latest else 'N/A' }}</div><div class="stat-label">{{ 'Normal Range' if latest and latest.bmi and latest.bmi < 25 else 'No data' }}</div></div>
+        </div>
+        <div class="charts-section">
+            <h3 class="chart-title">Weight Progress</h3>
+            <div class="chart-container">
+                {% if chart_data %}
+                {% set max_weight = chart_data | map(attribute='weight') | max %}
+                {% set min_weight = chart_data | map(attribute='weight') | min %}
+                {% set range = max_weight - min_weight if max_weight != min_weight else 1 %}
+                {% for point in chart_data %}
+                <div class="chart-bar" style="left: {{ (loop.index0 / (chart_data|length - 1) * 80 + 10) if chart_data|length > 1 else 50 }}%; height: {{ ((point.weight - min_weight) / range * 30 + 60)|round }}%;"><span>{{ point.weight }}</span></div>
+                {% endfor %}
+                {% else %}
+                <p style="color: var(--text-secondary); padding: 20px; text-align: center;">No weight data available</p>
+                {% endif %}
+            </div>
+            <div class="chart-labels">
+                {% if chart_data %}
+                {% for point in chart_data %}
+                <span>{{ point.date }}</span>
+                {% endfor %}
+                {% else %}
+                <span>No data</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="health-card" style="margin-bottom: 30px;">
+    <div class="card-header"><h2 class="card-title">Measurement Calendar</h2></div>
+    <div class="calendar-grid" style="margin-top: 15px;">
+        {% if records %}
+        {% for record in records %}
+        <div class="calendar-day measured">{{ record.date.day if record.date else '' }}</div>
+        {% endfor %}
+        {% else %}
+        <p style="color: var(--text-secondary); padding: 20px;">No measurements recorded</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="health-card" style="margin-bottom: 30px;">
+    <div class="card-header"><h2 class="card-title">Health Plan</h2></div>
+    <div class="plan-items">
+        {% if plan_items %}
+        {% for item in plan_items %}
+        <div class="plan-item {{ 'completed' if item.completed else '' }}">
+            <div class="plan-item-content">
+                <h4>{{ item.title }}</h4>
+                <p>{{ item.description }}</p>
+            </div>
+            <div class="plan-item-actions">
+                {% if not item.completed %}
+                <form method="POST" action="{{ url_for('health.complete_plan_item', id=item.id) }}" style="display:inline;">
+                    <button class="plan-action-btn complete" type="submit"><i class="fas fa-check"></i></button>
+                </form>
+                {% endif %}
+                <form method="POST" action="{{ url_for('health.delete_plan_item', id=item.id) }}" style="display:inline;">
+                    <button class="plan-action-btn delete" type="submit"><i class="fas fa-trash"></i></button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p style="color: var(--text-secondary); padding: 20px;">No plan items yet</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="health-card">
+    <div class="export-section">
+        <h3 class="card-title" style="margin-bottom: 15px;">Export Health Data</h3>
+        <a href="{{ url_for('health.export_data') }}" class="export-btn"><i class="fas fa-download"></i> Export to TXT</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/health.js') }}"></script>
+<script>
+document.getElementById('addMeasurementBtn').addEventListener('click', function() {
+    document.querySelector('.basic-info-form').scrollIntoView({ behavior: 'smooth' });
+});
+document.querySelectorAll('.plan-action-btn.complete').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        var form = this.closest('form');
+        form.submit();
+    });
+});
+document.querySelectorAll('.plan-action-btn.delete').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (confirm('Delete this plan item?')) {
+            var form = this.closest('form');
+            form.submit();
+        }
+    });
+});
+</script>
+{% endblock %}

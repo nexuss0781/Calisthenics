@@ -1,0 +1,28 @@
+<div class="sidebar">
+    <div class="logo">
+        <h2><i class="fas fa-dumbbell"></i> <span>Calisthenics</span></h2>
+    </div>
+    <ul class="nav-links">
+        {% set nav_items = [
+            ('home', 'fa-home', 'Home', 'main.index'),
+            ('workouts', 'fa-running', 'Workouts', 'workouts.list'),
+            ('calendar', 'fa-calendar-alt', 'Calendar', 'calendar.view'),
+            ('schedule', 'fa-clock', 'Schedule', 'schedule.view'),
+            ('health', 'fa-heartbeat', 'Health', 'health.view'),
+            ('plan', 'fa-tasks', 'Plan', 'plan.view'),
+            ('tournament', 'fa-trophy', 'Tournament', 'tournament.view'),
+            ('goals', 'fa-bullseye', 'Goals', 'goals.view'),
+            ('motivation', 'fa-fire', 'Motivation', 'motivation.view'),
+            ('videos', 'fa-video', 'Videos', 'videos.view')
+        ] %}
+        {% for page_id, icon, label, route in nav_items %}
+        <li>
+            <a href="{{ url_for(route) }}"
+               class="{% if active_page == page_id %}active{% endif %}"
+               data-page="{{ page_id }}">
+                <i class="fas {{ icon }}"></i> <span>{{ label }}</span>
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+</div>

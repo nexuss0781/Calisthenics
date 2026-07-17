@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Tournament - Calisthenics{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/tournament.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h1>Tournament</h1>
+    <div class="header-actions">
+        <button onclick="document.getElementById('joinModal').style.display='flex'"><i class="fas fa-plus"></i> Join Tournament</button>
+    </div>
+</div>
+
+<div class="tournament-layout">
+    <div class="level-card">
+        <div class="card-header"><h2 class="card-title">Your Level</h2></div>
+        <div class="level-display">{{ user_level.current_level if user_level else 1 }}</div>
+        <div class="level-title">Level {{ user_level.current_level if user_level else 1 }}</div>
+        <div class="level-rank">{{ user_level.rank_name if user_level else 'Beginner' }}</div>
+        <div class="xp-bar"><div class="xp-fill" style="width: {{ xp_percent }}%;"></div></div>
+        <div class="xp-info"><span>{{ "{:,}".format(user_level.current_xp if user_level else 0) }} XP</span><span>{{ "{:,}".format(user_level.max_xp if user_level else 1000) }} XP</span></div>
+        <div class="stats-grid">
+            <div class="stat-item"><div class="stat-value tournaments">{{ user_level.tournaments_participated if user_level else 0 }}</div><div class="stat-label">Tournaments</div></div>
+            <div class="stat-item"><div class="stat-value wins">{{ user_level.wins if user_level else 0 }}</div><div class="stat-label">Wins</div></div>
+            <div class="stat-item"><div class="stat-value rank">#{{ user_level.global_rank if user_level else 0 }}</div><div class="stat-label">Global Rank</div></div>
+            <div class="stat-item"><div class="stat-value streak">{{ user_level.win_streak if user_level else 0 }}</div><div class="stat-label">Win Streak</div></div>
+        </div>
+        <div class="level-graph">
+            <h3 class="graph-title">Level Progress</h3>
+            <div class="graph-container">
+                {% for entry in level_history_data %}
+                <div class="graph-bar" style="left: {{ loop.index0 * 100 // (level_history_data|length if level_history_data|length > 0 else 1) }}%; height: {{ (entry.level / 30 * 100)|int }}%;"><span>L{{ entry.level }}</span></div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="challenges-card">
+        <div class="card-header"><h2 class="challenges-title">Available Challenges</h2></div>
+        <div class="challenge-list">
+            {% for challenge in challenges %}
+            <div class="challenge-item {{ challenge.status }}">
+                <div class="challenge-header"><div><div class="challenge-title">{{ challenge.title }}</div><div class="challenge-level">Level {{ challenge.level_required }} Required</div></div></div>
+                <div class="challenge-details">
+                    {% for key, value in challenge.details_dict.items() %}
+                    <div class="detail-item"><div class="detail-value">{{ value }}</div><div class="detail-label">{{ key.replace('_', ' ').title() }}</div></div>
+                    {% endfor %}
+                </div>
+                {% if challenge.status == 'completed' %}
+                <div class="challenge-time"><i class="fas fa-check-circle"></i> Completed</div>
+                {% else %}
+                <div class="challenge-time"><i class="fas fa-clock"></i> Time Limit: {{ challenge.time_limit }}</div>
+                {% endif %}
+                <div class="challenge-actions">
+                    {% if challenge.status == 'active' %}
+                    <form method="POST" action="{{ url_for('tournament.start_challenge', id=challenge.id) }}" style="display:inline;">
+                        <button type="submit" class="challenge-btn start">Start Challenge</button>
+                    </form>
+                    {% elif challenge.status == 'completed' %}
+                    <button class="challenge-btn complete" disabled>Completed</button>
+                    {% elif challenge.status == 'locked' %}
+                    <form method="POST" action="{{ url_for('tournament.start_challenge', id=challenge.id) }}" style="display:inline;">
+                        <button type="submit" class="challenge-btn locked">Locked</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="calendar-section">
+            <h3 class="calendar-title">Tournament Calendar</h3>
+            <div class="calendar-grid">
+                <div class="calendar-day tournament">3</div><div class="calendar-day">5</div><div class="calendar-day completed">7</div>
+                <div class="calendar-day">10</div><div class="calendar-day tournament">12</div><div class="calendar-day">15</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="joinModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
+    <div style="background:#1a1a2e; border-radius:16px; padding:24px; max-width:400px; width:90%; border:1px solid #2a2a4a;">
+        <h3 style="color:#fff; margin-bottom:16px;">Join Tournament</h3>
+        <form method="POST" action="{{ url_for('tournament.join') }}">
+            <p style="color:#a0a0b0; margin-bottom:16px;">Are you sure you want to join the next tournament?</p>
+            <div style="display:flex; gap:8px;">
+                <button type="submit" style="flex:1; padding:10px; background:#6c63ff; color:#fff; border:none; border-radius:8px; cursor:pointer;">Join</button>
+                <button type="button" onclick="document.getElementById('joinModal').style.display='none'" style="flex:1; padding:10px; background:#2a2a4a; color:#fff; border:none; border-radius:8px; cursor:pointer;">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/tournament.js') }}"></script>
+{% endblock %}

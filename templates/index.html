@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Calisthenics Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h1>Dashboard</h1>
+    <div class="header-actions">
+        <button><i class="fas fa-plus"></i> New Workout</button>
+    </div>
+</div>
+<div class="dashboard-grid">
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-running"></i>
+            <h3>Total Workouts</h3>
+        </div>
+        <div class="stat-number">{{ total_workouts }}</div>
+        <p style="color: var(--text-secondary);">This month: {{ monthly_workouts }} workouts completed</p>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-bullseye"></i>
+            <h3>Goals Achieved</h3>
+        </div>
+        <div class="stat-number">{{ goals_achieved }}/{{ total_goals }}</div>
+        <p style="color: var(--text-secondary);">{{ goals_percent }}% of monthly goals completed</p>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-heartbeat"></i>
+            <h3>Weight</h3>
+        </div>
+        <div class="stat-number">{{ latest_weight }}kg</div>
+        <p style="color: var(--text-secondary);">BMI: {{ bmi }} (Normal)</p>
+    </div>
+</div>
+
+<div class="workout-list">
+    <h3 style="margin-bottom: 15px;">Recent Workouts</h3>
+    {% if recent_workouts %}
+    {% for workout in recent_workouts %}
+    <div class="workout-item">
+        <div>
+            <strong>{{ workout.name }}</strong>
+            <p>{{ workout.exercises_used }}</p>
+        </div>
+        <span>{{ workout.scheduled_date.strftime('%b %d, %I:%M %p') if workout.scheduled_date else 'No date' }}</span>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="workout-item">
+        <div>
+            <strong>No recent workouts</strong>
+            <p>Start a workout to see it here</p>
+        </div>
+        <span>--</span>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

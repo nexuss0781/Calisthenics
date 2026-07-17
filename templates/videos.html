@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Videos - Calisthenics{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/videos.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h1>Videos</h1>
+    <div class="header-actions">
+        <button onclick="document.getElementById('uploadModal').style.display='flex'"><i class="fas fa-upload"></i> Upload Video</button>
+    </div>
+</div>
+
+<div class="categories-nav">
+    <a href="{{ url_for('videos.view') }}" class="category-btn {{ 'active' if not current_category }}"><i class="fas fa-th"></i> All</a>
+    <a href="{{ url_for('videos.view', category='tutorial') }}" class="category-btn {{ 'active' if current_category == 'tutorial' }}"><i class="fas fa-graduation-cap"></i> Tutorial</a>
+    <a href="{{ url_for('videos.view', category='workout') }}" class="category-btn {{ 'active' if current_category == 'workout' }}"><i class="fas fa-dumbbell"></i> Workout</a>
+    <a href="{{ url_for('videos.view', category='progress') }}" class="category-btn {{ 'active' if current_category == 'progress' }}"><i class="fas fa-chart-line"></i> Progress</a>
+    <a href="{{ url_for('videos.view', category='motivation') }}" class="category-btn {{ 'active' if current_category == 'motivation' }}"><i class="fas fa-fire"></i> Motivation</a>
+</div>
+
+<div class="videos-grid">
+    {% for video in videos %}
+    <div class="video-card">
+        <div class="video-thumbnail" {% if video.thumbnail_gradient %}style="background: {{ video.thumbnail_gradient }};"{% endif %}>
+            <div class="play-btn"><i class="fas fa-play"></i></div>
+            <div class="video-duration">{{ video.duration }}</div>
+        </div>
+        <div class="video-info">
+            <div class="video-title">{{ video.title }}</div>
+            <div class="video-description">{{ video.description }}</div>
+            <div class="video-meta">
+                <span>{{ video.upload_date.strftime('%b %d, %Y') if video.upload_date else '' }}</span>
+                <div class="video-stats">
+                    <div class="stat-item"><i class="fas fa-eye"></i> {{ video.views }}</div>
+                    <div class="stat-item"><i class="fas fa-heart"></i> {{ video.likes }}</div>
+                </div>
+            </div>
+            <div class="social-sharing">
+                <button class="share-btn facebook"><i class="fab fa-facebook-f"></i></button>
+                <button class="share-btn twitter"><i class="fab fa-twitter"></i></button>
+                <button class="share-btn instagram"><i class="fab fa-instagram"></i></button>
+                <button class="share-btn youtube"><i class="fab fa-youtube"></i></button>
+                <button class="share-btn whatsapp"><i class="fab fa-whatsapp"></i></button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% if not videos %}
+    <div style="text-align:center; padding:40px; color:#a0a0b0; grid-column:1/-1;">
+        <i class="fas fa-video fa-3x" style="margin-bottom:16px; opacity:0.5;"></i>
+        <p>No videos found.</p>
+    </div>
+    {% endif %}
+</div>
+
+<div id="uploadModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
+    <div style="background:#1a1a2e; border-radius:16px; padding:24px; max-width:400px; width:90%; border:1px solid #2a2a4a;">
+        <h3 style="color:#fff; margin-bottom:16px;">Upload Video</h3>
+        <form method="POST" action="{{ url_for('videos.upload') }}">
+            <div style="margin-bottom:12px;">
+                <input type="text" name="title" placeholder="Video Title" required style="width:100%; padding:10px; background:#2a2a4a; color:#fff; border:none; border-radius:8px;">
+            </div>
+            <div style="margin-bottom:12px;">
+                <textarea name="description" placeholder="Description" style="width:100%; padding:10px; background:#2a2a4a; color:#fff; border:none; border-radius:8px; height:60px;"></textarea>
+            </div>
+            <div style="margin-bottom:16px;">
+                <select name="category" style="width:100%; padding:10px; background:#2a2a4a; color:#fff; border:none; border-radius:8px;">
+                    <option value="tutorial">Tutorial</option>
+                    <option value="workout">Workout</option>
+                    <option value="progress">Progress</option>
+                    <option value="motivation">Motivation</option>
+                </select>
+            </div>
+            <div style="display:flex; gap:8px;">
+                <button type="submit" style="flex:1; padding:10px; background:#6c63ff; color:#fff; border:none; border-radius:8px; cursor:pointer;">Upload</button>
+                <button type="button" onclick="document.getElementById('uploadModal').style.display='none'" style="flex:1; padding:10px; background:#2a2a4a; color:#fff; border:none; border-radius:8px; cursor:pointer;">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/videos.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}500 - Server Error{% endblock %}
+{% block content %}
+<div class="header"><h1>500 - Server Error</h1></div>
+<div class="card">
+    <div class="card-header"><i class="fas fa-server"></i><h3>Something Went Wrong</h3></div>
+    <p style="color: var(--text-secondary); margin: 15px 0;">An unexpected error occurred. Please try again.</p>
+    <a href="/" style="color: var(--accent);">Return to Dashboard</a>
+</div>
+{% endblock %}

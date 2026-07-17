@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Motivation - Calisthenics{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/motivation.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h1>Motivation</h1>
+    <div class="header-actions">
+        <button onclick="document.getElementById('addModal').style.display='flex'"><i class="fas fa-plus"></i> Add Content</button>
+    </div>
+</div>
+
+<div class="categories-nav">
+    <a href="{{ url_for('motivation.view') }}" class="category-btn {{ 'active' if not current_category }}"><i class="fas fa-th"></i> All</a>
+    <a href="{{ url_for('motivation.view', category='video') }}" class="category-btn {{ 'active' if current_category == 'video' }}"><i class="fas fa-play-circle"></i> Video</a>
+    <a href="{{ url_for('motivation.view', category='book') }}" class="category-btn {{ 'active' if current_category == 'book' }}"><i class="fas fa-book"></i> Book</a>
+    <a href="{{ url_for('motivation.view', category='quote') }}" class="category-btn {{ 'active' if current_category == 'quote' }}"><i class="fas fa-quote-left"></i> Quote</a>
+    <a href="{{ url_for('motivation.view', category='movie') }}" class="category-btn {{ 'active' if current_category == 'movie' }}"><i class="fas fa-film"></i> Movie</a>
+    <a href="{{ url_for('motivation.view', category='podcast') }}" class="category-btn {{ 'active' if current_category == 'podcast' }}"><i class="fas fa-podcast"></i> Podcast</a>
+</div>
+
+<div class="motivation-grid">
+    {% for item in motivations %}
+    <div class="motivation-card">
+        <div class="card-image {{ item.category }}" {% if item.gradient %}style="background: {{ item.gradient }}"{% endif %}>
+            {% if item.category == 'video' %}
+            <i class="fas fa-play-circle fa-3x"></i>
+            {% elif item.category == 'book' %}
+            <i class="fas fa-book fa-3x"></i>
+            {% elif item.category == 'quote' %}
+            <i class="fas fa-quote-left fa-3x"></i>
+            {% elif item.category == 'movie' %}
+            <i class="fas fa-film fa-3x"></i>
+            {% elif item.category == 'podcast' %}
+            <i class="fas fa-podcast fa-3x"></i>
+            {% endif %}
+        </div>
+        <div class="card-content">
+            <div class="card-header"><div class="card-title">{{ item.title }}</div><div class="card-category">{{ item.category|capitalize }}</div></div>
+            <div class="card-description">{{ item.description }}</div>
+            <div class="card-meta">
+                {% if item.author %}
+                <span><i class="fas fa-user"></i> {{ item.author }}</span>
+                {% endif %}
+                {% if item.duration_or_pages %}
+                <span><i class="fas fa-clock"></i> {{ item.duration_or_pages }}</span>
+                {% endif %}
+            </div>
+            <div class="card-actions">
+                <form method="POST" action="{{ url_for('motivation.favorite', id=item.id, category=current_category) }}" style="display:inline;">
+                    <button type="submit" class="card-action-btn favorite"><i class="{{ 'fas' if item.is_favorite else 'far' }} fa-star"></i></button>
+                </form>
+                <form method="POST" action="{{ url_for('motivation.delete', id=item.id, category=current_category) }}" style="display:inline;">
+                    <button type="submit" class="card-action-btn delete"><i class="fas fa-trash"></i></button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% if not motivations %}
+    <div style="text-align:center; padding:40px; color:#a0a0b0; grid-column:1/-1;">
+        <i class="fas fa-inbox fa-3x" style="margin-bottom:16px; opacity:0.5;"></i>
+        <p>No motivation items found.</p>
+    </div>
+    {% endif %}
+</div>
+
+<div id="addModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
+    <div style="background:#1a1a2e; border-radius:16px; padding:24px; max-width:400px; width:90%; border:1px solid #2a2a4a;">
+        <h3 style="color:#fff; margin-bottom:16px;">Add Motivation</h3>
+        <form method="POST" action="{{ url_for('motivation.add') }}">
+            <div style="margin-bottom:12px;">
+                <input type="text" name="title" placeholder="Title" required style="width:100%; padding:10px; background:#2a2a4a; color:#fff; border:none; border-radius:8px;">
+            </div>
+            <div style="margin-bottom:12px;">
+                <textarea name="description" placeholder="Description" style="width:100%; padding:10px; background:#2a2a4a; color:#fff; border:none; border-radius:8px; height:60px;"></textarea>
+            </div>
+            <div style="margin-bottom:12px;">
+                <select name="category" style="width:100%; padding:10px; background:#2a2a4a; color:#fff; border:none; border-radius:8px;">
+                    <option value="video">Video</option>
+                    <option value="book">Book</option>
+                    <option value="quote">Quote</option>
+                    <option value="movie">Movie</option>
+                    <option value="podcast">Podcast</option>
+                </select>
+            </div>
+            <div style="margin-bottom:12px;">
+                <input type="text" name="author" placeholder="Author" style="width:100%; padding:10px; background:#2a2a4a; color:#fff; border:none; border-radius:8px;">
+            </div>
+            <div style="margin-bottom:16px;">
+                <input type="text" name="duration_or_pages" placeholder="Duration or Pages" style="width:100%; padding:10px; background:#2a2a4a; color:#fff; border:none; border-radius:8px;">
+            </div>
+            <div style="display:flex; gap:8px;">
+                <button type="submit" style="flex:1; padding:10px; background:#6c63ff; color:#fff; border:none; border-radius:8px; cursor:pointer;">Add</button>
+                <button type="button" onclick="document.getElementById('addModal').style.display='none'" style="flex:1; padding:10px; background:#2a2a4a; color:#fff; border:none; border-radius:8px; cursor:pointer;">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/motivation.js') }}"></script>
+{% endblock %}

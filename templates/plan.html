@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Plan - Calisthenics{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/plan.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h1>Training Plan</h1>
+    <div class="header-actions">
+        <button id="addPlanBtn"><i class="fas fa-plus"></i> Add Plan</button>
+    </div>
+</div>
+
+<div class="plan-layout">
+    <div class="plan-card">
+        <div class="card-header"><h2 class="card-title">Plan Overview</h2></div>
+        <div class="plan-stats">
+            <div class="stat-card"><div class="stat-label">Total Plans</div><div class="stat-value total">{{ total_plans }}</div></div>
+            <div class="stat-card"><div class="stat-label">Completed</div><div class="stat-value completed">{{ completed_count }}</div></div>
+            <div class="stat-card"><div class="stat-label">In Progress</div><div class="stat-value pending">{{ pending_count }}</div></div>
+        </div>
+        <div class="progress-section">
+            <h3 class="progress-title">Overall Progress</h3>
+            <div class="progress-bar"><div class="progress-fill" style="width: {{ progress_percent }}%;"></div></div>
+            <div class="progress-info"><span>{{ progress_percent }}% Completed</span><span>{{ completed_count }}/{{ total_plans }} plans</span></div>
+        </div>
+        <div class="timeline-chart">
+            <h3 class="progress-title">Timeline</h3>
+            <div class="timeline-container">
+                <div class="timeline-point completed" style="left: 10%;">1</div>
+                <div class="timeline-label" style="left: 10%;">Nov 1</div>
+                <div class="timeline-point completed" style="left: 30%;">2</div>
+                <div class="timeline-label" style="left: 30%;">Nov 5</div>
+                <div class="timeline-point pending" style="left: 50%;">3</div>
+                <div class="timeline-label" style="left: 50%;">Nov 10</div>
+                <div class="timeline-point upcoming" style="left: 70%;">4</div>
+                <div class="timeline-label" style="left: 70%;">Nov 15</div>
+                <div class="timeline-point upcoming" style="left: 90%;">5</div>
+                <div class="timeline-label" style="left: 90%;">Nov 20</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="plan-card">
+        <div class="card-header"><h2 class="card-title">Calendar</h2></div>
+        <div class="calendar-grid">
+            <div class="calendar-day completed">1</div><div class="calendar-day completed">2</div><div class="calendar-day">3</div>
+            <div class="calendar-day">4</div><div class="calendar-day completed">5</div><div class="calendar-day">6</div>
+            <div class="calendar-day planned">7</div><div class="calendar-day">8</div><div class="calendar-day">9</div>
+            <div class="calendar-day planned">10</div><div class="calendar-day">11</div><div class="calendar-day">12</div>
+        </div>
+    </div>
+</div>
+
+<div class="plan-cards">
+    <div class="cards-grid">
+        {% set status_map = {'completed': 'Completed', 'in_progress': 'In Progress', 'upcoming': 'Upcoming'} %}
+        {% set status_class_map = {'completed': 'status-completed', 'in_progress': 'status-pending', 'upcoming': 'status-upcoming'} %}
+        {% set type_icon_map = {'strength': 'fa-dumbbell', 'skill': 'fa-star', 'endurance': 'fa-heartbeat', 'flexibility': 'fa-person-walking', 'recovery': 'fa-bed'} %}
+        {% for plan in plans %}
+        <div class="plan-item-card">
+            <div class="plan-item-header"><div><div class="plan-item-title">{{ plan.title }}</div><div class="plan-item-status {{ status_class_map.get(plan.status, 'status-upcoming') }}">{{ status_map.get(plan.status, plan.status) }}</div></div></div>
+            <div class="plan-item-details">{{ plan.description }}</div>
+            <div class="plan-item-date"><i class="fas fa-calendar"></i> {{ plan.start_date.strftime('%b %d') if plan.start_date else '' }} - {{ plan.end_date.strftime('%b %d, %Y') if plan.end_date else '' }}</div>
+            <div class="plan-item-actions">
+                <button class="plan-action-btn edit"><i class="fas fa-edit"></i></button>
+                <form method="POST" action="{{ url_for('plan.delete_plan', id=plan.id) }}" style="display:inline;"><button type="submit" class="plan-action-btn delete" onclick="return confirm('Delete this plan?')"><i class="fas fa-trash"></i></button></form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="add-plan-modal" id="addPlanModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center;">
+    <div class="plan-card" style="max-width: 500px; width: 90%; margin: 0;">
+        <h2 class="plan-title">Create New Plan</h2>
+        <form method="POST" action="{{ url_for('plan.add_plan') }}">
+            <div style="margin-bottom: 20px;">
+                <label for="planTitle" style="display: block; margin-bottom: 8px; color: var(--text-primary);">Plan Title</label>
+                <input type="text" id="planTitle" name="title" placeholder="Enter plan title" required style="width: 100%; padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); border-radius: 5px; color: var(--text-primary); margin-bottom: 15px;">
+
+                <label for="planType" style="display: block; margin-bottom: 8px; color: var(--text-primary);">Plan Type</label>
+                <select id="planType" name="type" required style="width: 100%; padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); border-radius: 5px; color: var(--text-primary); margin-bottom: 15px;">
+                    <option value="">Select plan type</option>
+                    <option value="strength">Strength Training</option>
+                    <option value="skill">Skill Development</option>
+                    <option value="endurance">Endurance</option>
+                    <option value="flexibility">Flexibility & Mobility</option>
+                    <option value="recovery">Recovery</option>
+                </select>
+
+                <label for="planStartDate" style="display: block; margin-bottom: 8px; color: var(--text-primary);">Start Date</label>
+                <input type="date" id="planStartDate" name="start_date" required style="width: 100%; padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); border-radius: 5px; color: var(--text-primary); margin-bottom: 15px;">
+
+                <label for="planEndDate" style="display: block; margin-bottom: 8px; color: var(--text-primary);">End Date</label>
+                <input type="date" id="planEndDate" name="end_date" required style="width: 100%; padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); border-radius: 5px; color: var(--text-primary); margin-bottom: 15px;">
+
+                <label for="planDescription" style="display: block; margin-bottom: 8px; color: var(--text-primary);">Plan Description</label>
+                <textarea id="planDescription" name="description" placeholder="Describe your plan goals and activities" rows="4" required style="width: 100%; padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); border-radius: 5px; color: var(--text-primary);"></textarea>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" class="action-btn" id="cancelPlanBtn" style="color: var(--text-secondary); border: 1px solid var(--border-color); padding: 10px 20px; border-radius: 5px; background: transparent;"><i class="fas fa-times"></i> Cancel</button>
+                <button type="submit" class="action-btn" style="background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 5px;"><i class="fas fa-save"></i> Create Plan</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/plan.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var addPlanBtn = document.getElementById('addPlanBtn');
+    var addPlanModal = document.getElementById('addPlanModal');
+    var cancelPlanBtn = document.getElementById('cancelPlanBtn');
+
+    addPlanBtn.addEventListener('click', function() { addPlanModal.style.display = 'flex'; });
+    cancelPlanBtn.addEventListener('click', function() { addPlanModal.style.display = 'none'; });
+    addPlanModal.addEventListener('click', function(e) { if (e.target === addPlanModal) addPlanModal.style.display = 'none'; });
+
+    document.querySelectorAll('.plan-item-card').forEach(function(card) {
+        card.addEventListener('click', function(e) {
+            if (e.target.closest('.plan-action-btn') || e.target.closest('form')) return;
+            var title = this.querySelector('.plan-item-title').textContent;
+            var details = this.querySelector('.plan-item-details').textContent;
+            var date = this.querySelector('.plan-item-date').textContent;
+            var status = this.querySelector('.plan-item-status').textContent;
+            alert('Plan Details:\n\nTitle: ' + title + '\nStatus: ' + status + '\n' + date + '\n\nDescription: ' + details);
+        });
+    });
+
+    document.querySelectorAll('.plan-action-btn.edit').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            alert('Edit functionality would open a form to modify this plan.');
+        });
+    });
+});
+</script>
+{% endblock %}

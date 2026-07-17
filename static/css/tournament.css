@@ -1,0 +1,286 @@
+.tournament-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.level-card {
+    background: var(--card-bg);
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    border: 1px solid var(--border-color);
+    text-align: center;
+}
+
+.level-display {
+    font-size: 4rem;
+    font-weight: bold;
+    color: var(--primary);
+    margin: 20px 0;
+    text-shadow: 0 0 20px rgba(255, 107, 53, 0.5);
+}
+
+.level-title {
+    font-size: 1.8rem;
+    color: var(--text-primary);
+    margin-bottom: 15px;
+}
+
+.level-rank {
+    background: linear-gradient(45deg, var(--success), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.xp-bar {
+    height: 12px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 20px 0;
+}
+
+.xp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    border-radius: 6px;
+    width: 73%;
+}
+
+.xp-info {
+    display: flex;
+    justify-content: space-between;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.stat-item {
+    background: rgba(255,255,255,0.05);
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+}
+
+.stat-value {
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.stat-value.tournaments { color: var(--accent); }
+.stat-value.wins { color: var(--success); }
+.stat-value.rank { color: var(--primary); }
+.stat-value.streak { color: var(--warning); }
+
+.challenges-card {
+    background: var(--card-bg);
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    border: 1px solid var(--border-color);
+}
+
+.challenges-title {
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.challenge-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.challenge-item {
+    background: rgba(255,255,255,0.05);
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.challenge-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    border-color: var(--accent);
+}
+
+.challenge-item.completed {
+    border-left: 4px solid var(--success);
+    opacity: 0.8;
+}
+
+.challenge-item.active {
+    border-left: 4px solid var(--primary);
+    background: linear-gradient(90deg, rgba(255,107,53,0.1), transparent);
+}
+
+.challenge-item.locked {
+    border-left: 4px solid #555;
+    opacity: 0.6;
+}
+
+.challenge-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 15px;
+}
+
+.challenge-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.challenge-level {
+    background: rgba(116, 185, 255, 0.2);
+    color: var(--accent);
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.challenge-details {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.detail-item { text-align: center; }
+.detail-value { font-size: 1.3rem; font-weight: bold; color: var(--primary); }
+.detail-label { color: var(--text-secondary); font-size: 0.85rem; }
+
+.challenge-time {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.challenge-time i { color: var(--warning); }
+
+.challenge-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.challenge-btn {
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    border: none;
+    font-size: 0.9rem;
+}
+
+.challenge-btn.start { background: var(--primary); color: white; }
+.challenge-btn.start:hover { background: #e55a2b; }
+.challenge-btn.complete { background: var(--success); color: white; }
+.challenge-btn.complete:hover { background: #00a884; }
+.challenge-btn.locked { background: #555; color: #aaa; cursor: not-allowed; }
+
+.calendar-section { margin-top: 25px; }
+.calendar-title { text-align: center; margin-bottom: 15px; color: var(--text-primary); }
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    background: rgba(255,255,255,0.05);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.calendar-day {
+    text-align: center;
+    padding: 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.calendar-day:hover { background: rgba(255,255,255,0.1); }
+.calendar-day.tournament { background: rgba(116, 185, 255, 0.3); color: var(--accent); font-weight: bold; }
+.calendar-day.completed { background: rgba(0, 184, 148, 0.3); color: var(--success); font-weight: bold; }
+.calendar-day.today { background: rgba(255, 107, 53, 0.3); color: var(--primary); border: 2px solid var(--primary); }
+
+.calendar-day .day-indicator {
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--accent);
+}
+
+.calendar-day.completed .day-indicator { background: var(--success); }
+
+.level-graph { margin-top: 25px; }
+.graph-title { text-align: center; margin-bottom: 15px; color: var(--text-primary); }
+
+.graph-container {
+    height: 200px;
+    position: relative;
+    background: rgba(255,255,255,0.05);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    padding: 15px;
+}
+
+.graph-bar {
+    position: absolute;
+    bottom: 0;
+    width: 30px;
+    background: linear-gradient(to top, var(--primary), var(--accent));
+    border-radius: 5px 5px 0 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.graph-label {
+    position: absolute;
+    bottom: 5px;
+    transform: translateX(-50%);
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+@media (max-width: 1200px) {
+    .tournament-layout { grid-template-columns: 1fr; }
+}
